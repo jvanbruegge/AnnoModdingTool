@@ -19,12 +19,29 @@ foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
     set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR} )
 endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
+macro(GroupSources curdir)
+   file(GLOB children RELATIVE ${PROJECT_SOURCE_DIR}/${curdir} ${PROJECT_SOURCE_DIR}/${curdir}/*)
+   foreach(child ${children})
+          if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/${curdir}/${child})
+                  GroupSources(${curdir}/${child})
+          else()
+                  string(REPLACE "/" "\\" groupname ${curdir})
+            source_group(${groupname} FILES ${PROJECT_SOURCE_DIR}/${curdir}/${child})
+          endif()
+   endforeach()
+endmacro()
+
+# Execute the macro
+GroupSources(src)
+
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 set(SCRS
 	src/main.cpp
-	src/ModelConverters.hpp src/ModelConverters.cpp
+	src/ModelStructs.hpp
+	src/ModelConverter.hpp
+	src/ModelConverters/PlyConverter.hpp src/ModelConverters/PlyConverter.cpp
 	src/ModelConverters/RpmConverter.hpp src/ModelConverters/RpmConverter.cpp
 	src/ModelConverters/ColladaConverter.hpp src/ModelConverters/ColladaConverter.cpp
 )
